@@ -3,6 +3,9 @@
 #include <string.h>
 #include <time.h>
 #include <stdlib.h>
+#include <locale.h>
+#include <wchar.h>
+#include <stdio.h>
 
 int boarder_little();
 int boarder_big();
@@ -15,22 +18,37 @@ int play_game();
 int create_rooms();
 int generate_walls();
 int find();
+
+
 struct room{
     int xul;
     int yul;
     int xdr;
     int ydr;
-    int doorx[3];
-    int doory[3];
+    int doorx[4];
+    int doory[4];
     int numdoor;
 };
 
+struct map{
+    struct room room;
+    int xh;
+    int yh;
+    int seenroom[];
+};
+
+
+
+
+
 int main() {
+
   initscr();
   start_color();
   init_pair(1,COLOR_RED,COLOR_BLACK);
   noecho();
- srand(time(0));
+  srand(time(0));
+  setlocale(LC_ALL, ""); 
   game_present();
   int result =login_menu();
   if(result != 0){
@@ -240,6 +258,27 @@ int play_game(){
     create_rooms();
     while(1){
         int c =getch();
+        clear();
+        reprint
+
+
+        if(c == 'j' || c == KEY_UP){
+            if()
+        }else if(c == 'h' || c == KEY_LEFT){
+
+        }else if(c == 'k' || c == KEY_DOWN){
+
+        }else if(c == 'l' || c == KEY_RIGHT){
+
+        }else if(c == 'y'){
+
+        }else if(c == 'u'){
+
+        }else if(c == 'b'){
+
+        }else if(c == 'n'){
+
+        }
     }
 }
 
@@ -264,33 +303,33 @@ int create_rooms(){
     int a ,b,x,y;
     for(int i = 0; i < numroom; i++){
         move(i,126);
-        a = get_random(5,23);
-        b = get_random(5, 9);
+        a = get_random(4,23);
+        b = get_random(4, 8);
         int min_x,max_x,min_y,max_y;
         if(rooms[i] %5 == 0){
             min_x =24* ((rooms[i]-1)%5)+2;
             max_x = 24*(rooms[i]%5 +5) +2 - (a + 1);
             if(rooms[i] / 5 == 1){
-                min_y= 2;
-                max_y= 12 - (b + 1);
+                min_y= 1;
+                max_y= 10 - (b + 1);
             }else if(rooms[i] / 5 == 2){
                 min_y = 12;
-                max_y = 22 - (b + 1);
+                max_y = 21 - (b + 1);
             }else if(rooms[i] / 5 == 3){
-            min_y = 22;
+            min_y = 23;
             max_y = 32 - (b + 1);
             }
         }else{
             min_x =24* ((rooms[i]-1)%5) +2;
             max_x = 24*(rooms[i]%5) +2 - (a + 1);
             if(rooms[i] / 5 == 0){
-                min_y= 2;
-                max_y= 12 - (b + 1);
+                min_y= 1;
+                max_y= 10 - (b + 1);
             }else if(rooms[i] / 5 == 1){
                 min_y = 12;
-                max_y = 22 - (b + 1);
+                max_y = 21 - (b + 1);
             }else if(rooms[i] / 5 == 2){
-            min_y = 22;
+            min_y = 23;
             max_y = 32 - (b + 1);
             }
         }
@@ -306,14 +345,14 @@ int create_rooms(){
         generate_walls(x,y,a,b);
     }
     for(int i = 0; i < numroom; i++){
-        if(rooms[i] == 1){
-            for(int n = rooms[i] + 1;n <= 5;n++){
+        if(rooms[i] != 5 && rooms[i] != 10 && rooms[i] != 15){
+            for(int n = rooms[i] + 1;n <= 5 * (rooms[i] / 5 + 1);n++){
                 if (find(n,rooms,numroom) != -1){
                     int j = find(n,rooms,numroom);
                     if(eroom[i].ydr <= eroom[j].ydr){
-                        eroom[i].doory[eroom[i].numdoor] = eroom[i].ydr - 1;
+                        eroom[i].doory[eroom[i].numdoor] = (eroom[j].yul+eroom[i].ydr)/2;
                         eroom[i].doorx[eroom[i].numdoor] = eroom[i].xdr;
-                        eroom[j].doory[eroom[j].numdoor] = eroom[i].ydr - 1;
+                        eroom[j].doory[eroom[j].numdoor] = (eroom[j].yul+eroom[i].ydr)/2;
                         eroom[j].doorx[eroom[j].numdoor] = eroom[j].xul;
                         mvprintw(eroom[i].doory[eroom[i].numdoor],eroom[i].doorx[eroom[i].numdoor],"+");
                         mvprintw(eroom[j].doory[eroom[j].numdoor],eroom[j].doorx[eroom[j].numdoor],"+");
@@ -323,350 +362,9 @@ int create_rooms(){
                         eroom[i].numdoor ++;
                         break;
                     }else if(eroom[i].ydr > eroom[j].ydr){
-                        eroom[i].doory[eroom[i].numdoor] = eroom[i].yul + 1;
+                        eroom[i].doory[eroom[i].numdoor] = (eroom[i].yul+eroom[j].ydr)/2;
                         eroom[i].doorx[eroom[i].numdoor] = eroom[i].xdr;
-                        eroom[j].doory[eroom[j].numdoor] = eroom[i].yul + 1;
-                        eroom[j].doorx[eroom[j].numdoor] = eroom[j].xul;
-                        mvprintw(eroom[i].doory[eroom[i].numdoor],eroom[i].doorx[eroom[i].numdoor],"+");
-                        mvprintw(eroom[j].doory[eroom[j].numdoor],eroom[j].doorx[eroom[j].numdoor],"+");
-                        for(int k = eroom[i].doorx[eroom[i].numdoor] + 1;k < eroom[j].doorx[eroom[j].numdoor];k++){
-                            mvprintw(eroom[i].doory[eroom[i].numdoor],k,"#");
-                        }
-                        eroom[i].numdoor ++;
-                        break;
-                    }
-                }
-            }
-        } else if(rooms[i] == 2){
-            for(int n = rooms[i] + 1;n <= 5;n++){
-                if (find(n,rooms,numroom) != -1){
-                    int j = find(n,rooms,numroom);
-                    if(eroom[i].ydr <= eroom[j].ydr){
-                        eroom[i].doory[eroom[i].numdoor] = eroom[i].ydr - 1;
-                        eroom[i].doorx[eroom[i].numdoor] = eroom[i].xdr;
-                        eroom[j].doory[eroom[j].numdoor] = eroom[i].ydr - 1;
-                        eroom[j].doorx[eroom[j].numdoor] = eroom[j].xul;
-                        mvprintw(eroom[i].doory[eroom[i].numdoor],eroom[i].doorx[eroom[i].numdoor],"+");
-                        mvprintw(eroom[j].doory[eroom[j].numdoor],eroom[j].doorx[eroom[j].numdoor],"+");
-                        for(int k = eroom[i].doorx[eroom[i].numdoor] +1;k < eroom[j].doorx[eroom[j].numdoor];k++){
-                            mvprintw(eroom[i].doory[eroom[i].numdoor],k,"#");
-                        }
-                        eroom[i].numdoor ++;
-                        break;
-                    }else if(eroom[i].ydr > eroom[j].ydr){
-                        eroom[i].doory[eroom[i].numdoor] = eroom[i].yul + 1;
-                        eroom[i].doorx[eroom[i].numdoor] = eroom[i].xdr;
-                        eroom[j].doory[eroom[j].numdoor] = eroom[i].yul + 1;
-                        eroom[j].doorx[eroom[j].numdoor] = eroom[j].xul;
-                        mvprintw(eroom[i].doory[eroom[i].numdoor],eroom[i].doorx[eroom[i].numdoor],"+");
-                        mvprintw(eroom[j].doory[eroom[j].numdoor],eroom[j].doorx[eroom[j].numdoor],"+");
-                        for(int k = eroom[i].doorx[eroom[i].numdoor] + 1;k < eroom[j].doorx[eroom[j].numdoor];k++){
-                            mvprintw(eroom[i].doory[eroom[i].numdoor],k,"#");
-                        }
-                        eroom[i].numdoor ++;
-                        break;
-                    }
-                }
-            }
-        } else if(rooms[i] == 3){
-            for(int n = rooms[i] + 1;n <= 5;n++){
-                if (find(n,rooms,numroom) != -1){
-                    int j = find(n,rooms,numroom);
-                    if(eroom[i].ydr <= eroom[j].ydr){
-                        eroom[i].doory[eroom[i].numdoor] = eroom[i].ydr - 1;
-                        eroom[i].doorx[eroom[i].numdoor] = eroom[i].xdr;
-                        eroom[j].doory[eroom[j].numdoor] = eroom[i].ydr - 1;
-                        eroom[j].doorx[eroom[j].numdoor] = eroom[j].xul;
-                        mvprintw(eroom[i].doory[eroom[i].numdoor],eroom[i].doorx[eroom[i].numdoor],"+");
-                        mvprintw(eroom[j].doory[eroom[j].numdoor],eroom[j].doorx[eroom[j].numdoor],"+");
-                        for(int k = eroom[i].doorx[eroom[i].numdoor] +1;k < eroom[j].doorx[eroom[j].numdoor];k++){
-                            mvprintw(eroom[i].doory[eroom[i].numdoor],k,"#");
-                        }
-                        eroom[i].numdoor ++;
-                        break;
-                    }else if(eroom[i].ydr > eroom[j].ydr){
-                        eroom[i].doory[eroom[i].numdoor] = eroom[i].yul + 1;
-                        eroom[i].doorx[eroom[i].numdoor] = eroom[i].xdr;
-                        eroom[j].doory[eroom[j].numdoor] = eroom[i].yul + 1;
-                        eroom[j].doorx[eroom[j].numdoor] = eroom[j].xul;
-                        mvprintw(eroom[i].doory[eroom[i].numdoor],eroom[i].doorx[eroom[i].numdoor],"+");
-                        mvprintw(eroom[j].doory[eroom[j].numdoor],eroom[j].doorx[eroom[j].numdoor],"+");
-                        for(int k = eroom[i].doorx[eroom[i].numdoor] + 1;k < eroom[j].doorx[eroom[j].numdoor];k++){
-                            mvprintw(eroom[i].doory[eroom[i].numdoor],k,"#");
-                        }
-                        eroom[i].numdoor ++;
-                        break;
-                    }
-                }
-            }
-        } else if(rooms[i] == 4){
-            for(int n = rooms[i] + 1;n <= 5;n++){
-                if (find(n,rooms,numroom) != -1){
-                    int j = find(n,rooms,numroom);
-                    if(eroom[i].ydr <= eroom[j].ydr){
-                        eroom[i].doory[eroom[i].numdoor] = eroom[i].ydr - 1;
-                        eroom[i].doorx[eroom[i].numdoor] = eroom[i].xdr;
-                        eroom[j].doory[eroom[j].numdoor] = eroom[i].ydr - 1;
-                        eroom[j].doorx[eroom[j].numdoor] = eroom[j].xul;
-                        mvprintw(eroom[i].doory[eroom[i].numdoor],eroom[i].doorx[eroom[i].numdoor],"+");
-                        mvprintw(eroom[j].doory[eroom[j].numdoor],eroom[j].doorx[eroom[j].numdoor],"+");
-                        for(int k = eroom[i].doorx[eroom[i].numdoor] +1;k < eroom[j].doorx[eroom[j].numdoor];k++){
-                            mvprintw(eroom[i].doory[eroom[i].numdoor],k,"#");
-                        }
-                        eroom[i].numdoor ++;
-                        break;
-                    }else if(eroom[i].ydr > eroom[j].ydr){
-                        eroom[i].doory[eroom[i].numdoor] = eroom[i].yul + 1;
-                        eroom[i].doorx[eroom[i].numdoor] = eroom[i].xdr;
-                        eroom[j].doory[eroom[j].numdoor] = eroom[i].yul + 1;
-                        eroom[j].doorx[eroom[j].numdoor] = eroom[j].xul;
-                        mvprintw(eroom[i].doory[eroom[i].numdoor],eroom[i].doorx[eroom[i].numdoor],"+");
-                        mvprintw(eroom[j].doory[eroom[j].numdoor],eroom[j].doorx[eroom[j].numdoor],"+");
-                        for(int k = eroom[i].doorx[eroom[i].numdoor] + 1;k < eroom[j].doorx[eroom[j].numdoor];k++){
-                            mvprintw(eroom[i].doory[eroom[i].numdoor],k,"#");
-                        }
-                        eroom[i].numdoor ++;
-                        break;
-                    }
-                }
-            }
-        } else if(rooms[i] == 6){
-            for(int n = rooms[i] + 1;n <= 10;n++){
-                if (find(n,rooms,numroom) != -1){
-                    int j = find(n,rooms,numroom);
-                    if(eroom[i].ydr <= eroom[j].ydr){
-                        eroom[i].doory[eroom[i].numdoor] = eroom[i].ydr - 1;
-                        eroom[i].doorx[eroom[i].numdoor] = eroom[i].xdr;
-                        eroom[j].doory[eroom[j].numdoor] = eroom[i].ydr - 1;
-                        eroom[j].doorx[eroom[j].numdoor] = eroom[j].xul;
-                        mvprintw(eroom[i].doory[eroom[i].numdoor],eroom[i].doorx[eroom[i].numdoor],"+");
-                        mvprintw(eroom[j].doory[eroom[j].numdoor],eroom[j].doorx[eroom[j].numdoor],"+");
-                        for(int k = eroom[i].doorx[eroom[i].numdoor] +1;k < eroom[j].doorx[eroom[j].numdoor];k++){
-                            mvprintw(eroom[i].doory[eroom[i].numdoor],k,"#");
-                        }
-                        eroom[i].numdoor ++;
-                        break;
-                    }else if(eroom[i].ydr > eroom[j].ydr){
-                        eroom[i].doory[eroom[i].numdoor] = eroom[i].yul + 1;
-                        eroom[i].doorx[eroom[i].numdoor] = eroom[i].xdr;
-                        eroom[j].doory[eroom[j].numdoor] = eroom[i].yul + 1;
-                        eroom[j].doorx[eroom[j].numdoor] = eroom[j].xul;
-                        mvprintw(eroom[i].doory[eroom[i].numdoor],eroom[i].doorx[eroom[i].numdoor],"+");
-                        mvprintw(eroom[j].doory[eroom[j].numdoor],eroom[j].doorx[eroom[j].numdoor],"+");
-                        for(int k = eroom[i].doorx[eroom[i].numdoor] + 1;k < eroom[j].doorx[eroom[j].numdoor];k++){
-                            mvprintw(eroom[i].doory[eroom[i].numdoor],k,"#");
-                        }
-                        eroom[i].numdoor ++;
-                        break;
-                    }
-                }
-            }
-        } else if(rooms[i] == 7){
-            for(int n = rooms[i] + 1;n <= 10;n++){
-                if (find(n,rooms,numroom) != -1){
-                    int j = find(n,rooms,numroom);
-                    if(eroom[i].ydr <= eroom[j].ydr){
-                        eroom[i].doory[eroom[i].numdoor] = eroom[i].ydr - 1;
-                        eroom[i].doorx[eroom[i].numdoor] = eroom[i].xdr;
-                        eroom[j].doory[eroom[j].numdoor] = eroom[i].ydr - 1;
-                        eroom[j].doorx[eroom[j].numdoor] = eroom[j].xul;
-                        mvprintw(eroom[i].doory[eroom[i].numdoor],eroom[i].doorx[eroom[i].numdoor],"+");
-                        mvprintw(eroom[j].doory[eroom[j].numdoor],eroom[j].doorx[eroom[j].numdoor],"+");
-                        for(int k = eroom[i].doorx[eroom[i].numdoor] +1;k < eroom[j].doorx[eroom[j].numdoor];k++){
-                            mvprintw(eroom[i].doory[eroom[i].numdoor],k,"#");
-                        }
-                        eroom[i].numdoor ++;
-                        break;
-                    }else if(eroom[i].ydr > eroom[j].ydr){
-                        eroom[i].doory[eroom[i].numdoor] = eroom[i].yul + 1;
-                        eroom[i].doorx[eroom[i].numdoor] = eroom[i].xdr;
-                        eroom[j].doory[eroom[j].numdoor] = eroom[i].yul + 1;
-                        eroom[j].doorx[eroom[j].numdoor] = eroom[j].xul;
-                        mvprintw(eroom[i].doory[eroom[i].numdoor],eroom[i].doorx[eroom[i].numdoor],"+");
-                        mvprintw(eroom[j].doory[eroom[j].numdoor],eroom[j].doorx[eroom[j].numdoor],"+");
-                        for(int k = eroom[i].doorx[eroom[i].numdoor] + 1;k < eroom[j].doorx[eroom[j].numdoor];k++){
-                            mvprintw(eroom[i].doory[eroom[i].numdoor],k,"#");
-                        }
-                        eroom[i].numdoor ++;
-                        break;
-                    }
-                }
-            }
-        } else if(rooms[i] == 8){
-            for(int n = rooms[i] + 1;n <= 10;n++){
-                if (find(n,rooms,numroom) != -1){
-                    int j = find(n,rooms,numroom);
-                    if(eroom[i].ydr <= eroom[j].ydr){
-                        eroom[i].doory[eroom[i].numdoor] = eroom[i].ydr - 1;
-                        eroom[i].doorx[eroom[i].numdoor] = eroom[i].xdr;
-                        eroom[j].doory[eroom[j].numdoor] = eroom[i].ydr - 1;
-                        eroom[j].doorx[eroom[j].numdoor] = eroom[j].xul;
-                        mvprintw(eroom[i].doory[eroom[i].numdoor],eroom[i].doorx[eroom[i].numdoor],"+");
-                        mvprintw(eroom[j].doory[eroom[j].numdoor],eroom[j].doorx[eroom[j].numdoor],"+");
-                        for(int k = eroom[i].doorx[eroom[i].numdoor] +1;k < eroom[j].doorx[eroom[j].numdoor];k++){
-                            mvprintw(eroom[i].doory[eroom[i].numdoor],k,"#");
-                        }
-                        eroom[i].numdoor ++;
-                        break;
-                    }else if(eroom[i].ydr > eroom[j].ydr){
-                        eroom[i].doory[eroom[i].numdoor] = eroom[i].yul + 1;
-                        eroom[i].doorx[eroom[i].numdoor] = eroom[i].xdr;
-                        eroom[j].doory[eroom[j].numdoor] = eroom[i].yul + 1;
-                        eroom[j].doorx[eroom[j].numdoor] = eroom[j].xul;
-                        mvprintw(eroom[i].doory[eroom[i].numdoor],eroom[i].doorx[eroom[i].numdoor],"+");
-                        mvprintw(eroom[j].doory[eroom[j].numdoor],eroom[j].doorx[eroom[j].numdoor],"+");
-                        for(int k = eroom[i].doorx[eroom[i].numdoor] + 1;k < eroom[j].doorx[eroom[j].numdoor];k++){
-                            mvprintw(eroom[i].doory[eroom[i].numdoor],k,"#");
-                        }
-                        eroom[i].numdoor ++;
-                        break;
-                    }
-                }
-            }
-        } else if(rooms[i] == 9){
-            for(int n = rooms[i] + 1;n <= 10;n++){
-                if (find(n,rooms,numroom) != -1){
-                    int j = find(n,rooms,numroom);
-                    if(eroom[i].ydr <= eroom[j].ydr){
-                        eroom[i].doory[eroom[i].numdoor] = eroom[i].ydr - 1;
-                        eroom[i].doorx[eroom[i].numdoor] = eroom[i].xdr;
-                        eroom[j].doory[eroom[j].numdoor] = eroom[i].ydr - 1;
-                        eroom[j].doorx[eroom[j].numdoor] = eroom[j].xul;
-                        mvprintw(eroom[i].doory[eroom[i].numdoor],eroom[i].doorx[eroom[i].numdoor],"+");
-                        mvprintw(eroom[j].doory[eroom[j].numdoor],eroom[j].doorx[eroom[j].numdoor],"+");
-                        for(int k = eroom[i].doorx[eroom[i].numdoor] +1;k < eroom[j].doorx[eroom[j].numdoor];k++){
-                            mvprintw(eroom[i].doory[eroom[i].numdoor],k,"#");
-                        }
-                        eroom[i].numdoor ++;
-                        break;
-                    }else if(eroom[i].ydr > eroom[j].ydr){
-                        eroom[i].doory[eroom[i].numdoor] = eroom[i].yul + 1;
-                        eroom[i].doorx[eroom[i].numdoor] = eroom[i].xdr;
-                        eroom[j].doory[eroom[j].numdoor] = eroom[i].yul + 1;
-                        eroom[j].doorx[eroom[j].numdoor] = eroom[j].xul;
-                        mvprintw(eroom[i].doory[eroom[i].numdoor],eroom[i].doorx[eroom[i].numdoor],"+");
-                        mvprintw(eroom[j].doory[eroom[j].numdoor],eroom[j].doorx[eroom[j].numdoor],"+");
-                        for(int k = eroom[i].doorx[eroom[i].numdoor] + 1;k < eroom[j].doorx[eroom[j].numdoor];k++){
-                            mvprintw(eroom[i].doory[eroom[i].numdoor],k,"#");
-                        }
-                        eroom[i].numdoor ++;
-                        break;
-                    }
-                }
-            }
-        } else if(rooms[i] == 11){
-            for(int n = rooms[i] + 1;n <= 15;n++){
-                if (find(n,rooms,numroom) != -1){
-                    int j = find(n,rooms,numroom);
-                    if(eroom[i].ydr <= eroom[j].ydr){
-                        eroom[i].doory[eroom[i].numdoor] = eroom[i].ydr - 1;
-                        eroom[i].doorx[eroom[i].numdoor] = eroom[i].xdr;
-                        eroom[j].doory[eroom[j].numdoor] = eroom[i].ydr - 1;
-                        eroom[j].doorx[eroom[j].numdoor] = eroom[j].xul;
-                        mvprintw(eroom[i].doory[eroom[i].numdoor],eroom[i].doorx[eroom[i].numdoor],"+");
-                        mvprintw(eroom[j].doory[eroom[j].numdoor],eroom[j].doorx[eroom[j].numdoor],"+");
-                        for(int k = eroom[i].doorx[eroom[i].numdoor] +1;k < eroom[j].doorx[eroom[j].numdoor];k++){
-                            mvprintw(eroom[i].doory[eroom[i].numdoor],k,"#");
-                        }
-                        eroom[i].numdoor ++;
-                        break;
-                    }else if(eroom[i].ydr > eroom[j].ydr){
-                        eroom[i].doory[eroom[i].numdoor] = eroom[i].yul + 1;
-                        eroom[i].doorx[eroom[i].numdoor] = eroom[i].xdr;
-                        eroom[j].doory[eroom[j].numdoor] = eroom[i].yul + 1;
-                        eroom[j].doorx[eroom[j].numdoor] = eroom[j].xul;
-                        mvprintw(eroom[i].doory[eroom[i].numdoor],eroom[i].doorx[eroom[i].numdoor],"+");
-                        mvprintw(eroom[j].doory[eroom[j].numdoor],eroom[j].doorx[eroom[j].numdoor],"+");
-                        for(int k = eroom[i].doorx[eroom[i].numdoor] + 1;k < eroom[j].doorx[eroom[j].numdoor];k++){
-                            mvprintw(eroom[i].doory[eroom[i].numdoor],k,"#");
-                        }
-                        eroom[i].numdoor ++;
-                        break;
-                    }
-                }
-            }
-        } else if(rooms[i] == 12){
-            for(int n = rooms[i] + 1;n <= 15;n++){
-                if (find(n,rooms,numroom) != -1){
-                    int j = find(n,rooms,numroom);
-                    if(eroom[i].ydr <= eroom[j].ydr){
-                        eroom[i].doory[eroom[i].numdoor] = eroom[i].ydr - 1;
-                        eroom[i].doorx[eroom[i].numdoor] = eroom[i].xdr;
-                        eroom[j].doory[eroom[j].numdoor] = eroom[i].ydr - 1;
-                        eroom[j].doorx[eroom[j].numdoor] = eroom[j].xul;
-                        mvprintw(eroom[i].doory[eroom[i].numdoor],eroom[i].doorx[eroom[i].numdoor],"+");
-                        mvprintw(eroom[j].doory[eroom[j].numdoor],eroom[j].doorx[eroom[j].numdoor],"+");
-                        for(int k = eroom[i].doorx[eroom[i].numdoor] +1;k < eroom[j].doorx[eroom[j].numdoor];k++){
-                            mvprintw(eroom[i].doory[eroom[i].numdoor],k,"#");
-                        }
-                        eroom[i].numdoor ++;
-                        break;
-                    }else if(eroom[i].ydr > eroom[j].ydr){
-                        eroom[i].doory[eroom[i].numdoor] = eroom[i].yul + 1;
-                        eroom[i].doorx[eroom[i].numdoor] = eroom[i].xdr;
-                        eroom[j].doory[eroom[j].numdoor] = eroom[i].yul + 1;
-                        eroom[j].doorx[eroom[j].numdoor] = eroom[j].xul;
-                        mvprintw(eroom[i].doory[eroom[i].numdoor],eroom[i].doorx[eroom[i].numdoor],"+");
-                        mvprintw(eroom[j].doory[eroom[j].numdoor],eroom[j].doorx[eroom[j].numdoor],"+");
-                        for(int k = eroom[i].doorx[eroom[i].numdoor] + 1;k < eroom[j].doorx[eroom[j].numdoor];k++){
-                            mvprintw(eroom[i].doory[eroom[i].numdoor],k,"#");
-                        }
-                        eroom[i].numdoor ++;
-                        break;
-                    }
-                }
-            }
-        } else if(rooms[i] == 13){
-            for(int n = rooms[i] + 1;n <= 15;n++){
-                if (find(n,rooms,numroom) != -1){
-                    int j = find(n,rooms,numroom);
-                    if(eroom[i].ydr <= eroom[j].ydr){
-                        eroom[i].doory[eroom[i].numdoor] = eroom[i].ydr - 1;
-                        eroom[i].doorx[eroom[i].numdoor] = eroom[i].xdr;
-                        eroom[j].doory[eroom[j].numdoor] = eroom[i].ydr - 1;
-                        eroom[j].doorx[eroom[j].numdoor] = eroom[j].xul;
-                        mvprintw(eroom[i].doory[eroom[i].numdoor],eroom[i].doorx[eroom[i].numdoor],"+");
-                        mvprintw(eroom[j].doory[eroom[j].numdoor],eroom[j].doorx[eroom[j].numdoor],"+");
-                        for(int k = eroom[i].doorx[eroom[i].numdoor] +1;k < eroom[j].doorx[eroom[j].numdoor];k++){
-                            mvprintw(eroom[i].doory[eroom[i].numdoor],k,"#");
-                        }
-                        eroom[i].numdoor ++;
-                        break;
-                    }else if(eroom[i].ydr > eroom[j].ydr){
-                        eroom[i].doory[eroom[i].numdoor] = eroom[i].yul + 1;
-                        eroom[i].doorx[eroom[i].numdoor] = eroom[i].xdr;
-                        eroom[j].doory[eroom[j].numdoor] = eroom[i].yul + 1;
-                        eroom[j].doorx[eroom[j].numdoor] = eroom[j].xul;
-                        mvprintw(eroom[i].doory[eroom[i].numdoor],eroom[i].doorx[eroom[i].numdoor],"+");
-                        mvprintw(eroom[j].doory[eroom[j].numdoor],eroom[j].doorx[eroom[j].numdoor],"+");
-                        for(int k = eroom[i].doorx[eroom[i].numdoor] + 1;k < eroom[j].doorx[eroom[j].numdoor];k++){
-                            mvprintw(eroom[i].doory[eroom[i].numdoor],k,"#");
-                        }
-                        eroom[i].numdoor ++;
-                        break;
-                    }
-                }
-            }
-        } else if(rooms[i] == 14){
-            for(int n = rooms[i] + 1;n <= 15;n++){
-                if (find(n,rooms,numroom) != -1){
-                    int j = find(n,rooms,numroom);
-                    if(eroom[i].ydr <= eroom[j].ydr){
-                        eroom[i].doory[eroom[i].numdoor] = eroom[i].ydr - 1;
-                        eroom[i].doorx[eroom[i].numdoor] = eroom[i].xdr;
-                        eroom[j].doory[eroom[j].numdoor] = eroom[i].ydr - 1;
-                        eroom[j].doorx[eroom[j].numdoor] = eroom[j].xul;
-                        mvprintw(eroom[i].doory[eroom[i].numdoor],eroom[i].doorx[eroom[i].numdoor],"+");
-                        mvprintw(eroom[j].doory[eroom[j].numdoor],eroom[j].doorx[eroom[j].numdoor],"+");
-                        for(int k = eroom[i].doorx[eroom[i].numdoor] +1;k < eroom[j].doorx[eroom[j].numdoor];k++){
-                            mvprintw(eroom[i].doory[eroom[i].numdoor],k,"#");
-                        }
-                        eroom[i].numdoor ++;
-                        break;
-                    }else if(eroom[i].ydr > eroom[j].ydr){
-                        eroom[i].doory[eroom[i].numdoor] = eroom[i].yul + 1;
-                        eroom[i].doorx[eroom[i].numdoor] = eroom[i].xdr;
-                        eroom[j].doory[eroom[j].numdoor] = eroom[i].yul + 1;
+                        eroom[j].doory[eroom[j].numdoor] = (eroom[i].yul+eroom[j].ydr)/2;
                         eroom[j].doorx[eroom[j].numdoor] = eroom[j].xul;
                         mvprintw(eroom[i].doory[eroom[i].numdoor],eroom[i].doorx[eroom[i].numdoor],"+");
                         mvprintw(eroom[j].doory[eroom[j].numdoor],eroom[j].doorx[eroom[j].numdoor],"+");
@@ -679,12 +377,65 @@ int create_rooms(){
                 }
             }
         }
-
+        ////inja ovelap nemishe bayad kajesh kony
+        for(int n = rooms[i] + 5;n <= 15;n += 5){
+            if (find(n,rooms,numroom) != -1){
+                int j = find(n,rooms,numroom);
+                if(eroom[i].xdr <= eroom[j].xdr){
+                    eroom[i].doorx[eroom[i].numdoor] = eroom[i].xul +1;
+                    eroom[i].doory[eroom[i].numdoor] = eroom[i].ydr;
+                    eroom[j].doorx[eroom[j].numdoor] = eroom[j].xdr -1;
+                    eroom[j].doory[eroom[j].numdoor] = eroom[j].yul;
+                    mvprintw(eroom[i].doory[eroom[i].numdoor],eroom[i].doorx[eroom[i].numdoor],"+");
+                    mvprintw(eroom[j].doory[eroom[j].numdoor],eroom[j].doorx[eroom[j].numdoor],"+");
+                    for(int k = eroom[i].doory[eroom[i].numdoor] + 1;k <  eroom[j].doory[eroom[j].numdoor]/ 11 * 11 ;k++){
+                        mvprintw(k,eroom[i].doorx[eroom[i].numdoor],"#");
+                    }
+                    for(int k =eroom[j].doory[eroom[j].numdoor] -1;k >  eroom[j].doory[eroom[j].numdoor]/ 11 * 11 ;k--){
+                        mvprintw(k,eroom[j].doorx[eroom[j].numdoor],"#");
+                    }    
+                    for(int k = eroom[i].doorx[eroom[i].numdoor] ;k <= eroom[j].doorx[eroom[j].numdoor];k++){
+                        mvprintw(( eroom[j].doory[eroom[j].numdoor]/ 11) * 11,k,"#");
+                    }
+                    eroom[i].numdoor ++;
+                    refresh();
+                    break;
+                }else if(eroom[i].xdr > eroom[j].xdr){
+                    eroom[i].doorx[eroom[i].numdoor] = eroom[i].xdr -1;
+                    eroom[i].doory[eroom[i].numdoor] = eroom[i].ydr;
+                    eroom[j].doorx[eroom[j].numdoor] = eroom[j].xul + 1;
+                    eroom[j].doory[eroom[j].numdoor] = eroom[j].yul;
+                    mvprintw(eroom[i].doory[eroom[i].numdoor],eroom[i].doorx[eroom[i].numdoor],"+");
+                    mvprintw(eroom[j].doory[eroom[j].numdoor],eroom[j].doorx[eroom[j].numdoor],"+");
+                    for(int k = eroom[i].doory[eroom[i].numdoor] + 1;k < eroom[j].doory[eroom[j].numdoor] / 11 * 11 ;k++){
+                        mvprintw(k,eroom[i].doorx[eroom[i].numdoor],"#");
+                    }
+                    for(int k =eroom[j].doory[eroom[j].numdoor] -1;k > eroom[j].doory[eroom[j].numdoor]/ 11 * 11 ;k--){
+                        mvprintw(k,eroom[j].doorx[eroom[j].numdoor],"#");
+                    }
+                    for(int k = eroom[i].doorx[eroom[i].numdoor] ;k >= eroom[j].doorx[eroom[j].numdoor];k--){
+                        mvprintw( eroom[j].doory[eroom[j].numdoor]/ 11 * 11,k,"#");
+                    }
+                    eroom[i].numdoor ++;
+                    refresh();
+                    break;
+                }
+            }
+        }
+        refresh();
     }
+    for(int i = 0 ; i < numroom;i++){
+        for(int j = eroom[i].xul +1; j < eroom[i].xdr ; j++){
+            for(int k = eroom[i].yul + 1; k < eroom[i].ydr ;k++){
+                mvprintw(k, j, ".");
+            }
+        }
+    }
+    mvprintw(eroom[0].yul + 1,eroom[0].xul + 1,"@");
 }
 
 int generate_walls(int x, int y, int a, int b){
-    for(int i = 1;i <= a; i++){      
+    for(int i = 1;i <= a; i++){
         mvprintw(y,i + x ,"_");
         mvprintw(y + b + 1,i + x ,"_");
     }
